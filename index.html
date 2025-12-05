@@ -306,16 +306,31 @@
                 background: white; /* Per coprire eventuale testo che scorre sotto */
             }
 
-            /* --- CSS SPECIFICO PER FOOTER E MLPA --- */
+            /* --- CSS AGGIORNATO PER FIRMA E MLPA --- */
         
+        /* Stile opzione MLPA a schermo (più piccolo) */
+        .mlpa-controls label {
+            font-size: 12px; /* Ridotto */
+            font-weight: normal; /* Tolto il grassetto */
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .mlpa-controls input {
+            margin-right: 8px;
+        }
+
         /* Stile Footer Firma */
         .signature-footer {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end; /* Allinea in basso */
+            align-items: flex-end;
             margin-top: 40px;
             padding-top: 20px;
             font-family: Arial, sans-serif;
+            page-break-inside: avoid;
         }
 
         .footer-left {
@@ -324,54 +339,69 @@
         }
 
         .handwritten-date {
-            font-family: 'Courier New', Courier, monospace; /* Simula un timbro/macchina */
+            font-family: 'Courier New', Courier, monospace;
             font-size: 16px;
             margin-left: 10px;
-            border-bottom: 1px solid #000; /* Linea sotto la data */
+            border-bottom: 1px solid #000;
             padding: 0 5px;
             min-width: 100px;
             display: inline-block;
         }
 
         .footer-right {
-            text-align: left; /* Allineato a sinistra rispetto al blocco destro */
-            min-width: 200px;
+            text-align: left;
+            min-width: 220px;
         }
 
         .requester-label {
             font-size: 10px;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 5px;
+            margin-bottom: 30px; /* Spazio per la firma manuale */
             color: #333;
         }
 
-        .doctor-name {
+        /* Il nome del dottore in stampa */
+        .doctor-name-print {
             font-weight: bold;
             font-size: 15px;
-            border-top: 1px solid transparent; /* Spazio pulito */
+            border-top: 1px solid transparent;
         }
 
-        /* Gestione Stampa MLPA */
+        /* Il menu a tendina a schermo */
+        .doctor-select-ui {
+            padding: 5px;
+            font-size: 13px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+            margin-top: -20px; /* Posizionamento visivo */
+            width: 100%;
+        }
+
+        /* --- REGOLE DI STAMPA CRITICHE --- */
         @media print {
-            .mlpa-controls, #mlpa-input-box {
-                display: none !important; /* Nasconde checkbox e input in stampa */
+            /* Nascondi controlli interfaccia */
+            .mlpa-controls, #mlpa-input-box, .doctor-select-ui {
+                display: none !important;
             }
             
+            /* Mostra elementi solo stampa */
+            .doctor-name-print {
+                display: block !important;
+            }
+            
+            /* Gestione nota MLPA */
             #print-mlpa-note {
-                display: block !important; /* Mostra la nota fissa */
-                margin-top: 20px;
-                font-size: 13px;
+                /* Viene gestito via JS, ma di base margin */
+                margin-top: 10px; 
+                font-size: 12px;
+                font-weight: bold;
             }
 
             .signature-footer {
-                margin-top: 50px; /* Più spazio prima della firma */
-                page-break-inside: avoid; /* Evita che la firma finisca su un'altra pagina */
+                margin-top: 50px; 
             }
-            
-            /* Nasconde il vecchio footer generico se presente */
-            .print-footer { display: none; }
-        }
         }
     </style>
 </head>
@@ -467,37 +497,48 @@
             <!-- JS popola qui -->
         </div>
 
-<!-- BLOCCO MLPA (Visibile a schermo e stampa se attivo) -->
-        <div class="mlpa-wrapper" style="margin-top: 20px; border-top: 1px solid #ccc; padding-top:10px;">
+<!-- BLOCCO MLPA -->
+        <div class="mlpa-wrapper" style="margin-top: 20px; border-top: 1px solid #ddd; padding-top:10px;">
+            <!-- Visibile solo a schermo -->
             <div class="mlpa-controls">
-                <label style="font-weight:bold; cursor:pointer; font-size:14px;">
+                <label>
                     <input type="checkbox" id="mlpa-check" onchange="toggleMlpa()"> 
-                    AGGIUNGI ANALISI MLPA
+                    Aggiungi analisi MLPA (apre campo testo)
                 </label>
             </div>
             
-            <!-- Campo di input (appare solo se spuntato) -->
-            <div id="mlpa-input-box" style="display:none; margin-top:5px;">
-                <input type="text" id="mlpa-text" placeholder="Indicare i geni per MLPA (es. BRCA1, BRCA2...)" 
-                       style="width:100%; padding:8px; border:1px solid #aaa;">
+            <!-- Campo input (appare solo se spuntato a schermo) -->
+            <div id="mlpa-input-box" style="display:none; margin-top:5px; margin-left: 20px;">
+                <input type="text" id="mlpa-text" placeholder="Es. BRCA1, BRCA2..." 
+                       style="width:300px; padding:5px; border:1px solid #ccc; font-size:12px;">
             </div>
 
-            <!-- Nota che appare in STAMPA -->
-            <div id="print-mlpa-note" style="display:none; margin-top:10px; font-weight:bold; font-size:12px;">
+            <!-- Nota visibile IN STAMPA (solo se attivo) -->
+            <div id="print-mlpa-note" style="display:none;">
                 * MLPA: <span id="mlpa-print-value"></span>
             </div>
         </div>
 
-        <!-- FOOTER FIRMA (Identico alla foto) -->
+        <!-- FOOTER FIRMA CON MEDICO SELEZIONABILE -->
         <div class="signature-footer">
             <div class="footer-left">
-                DATA: <span class="handwritten-date" id="footer-date"></span>
+                DATA <span class="handwritten-date" id="footer-date"></span>
             </div>
+            
             <div class="footer-right">
                 <div class="requester-label">IL RICHIEDENTE</div>
-                <!-- Spazio per firma -->
-                <div style="height:30px;"></div> 
-                <div class="doctor-name">Dr. Michele Valiante</div>
+                
+                <!-- Menu a tendina (Visibile solo a schermo) -->
+                <select id="doctor-select" class="doctor-select-ui" onchange="updateDoctorSign()">
+                    <option value="Dr. Michele Valiante">Dr. Michele Valiante</option>
+                    <option value="Dr.ssa Valentina Lodato">Dr.ssa Valentina Lodato</option>
+                    <option value="Dr. Alessandro Ferraris">Dr. Alessandro Ferraris</option>
+                </select>
+
+                <!-- Nome Medico (Visibile solo in stampa) -->
+                <div id="doctor-name-print" class="doctor-name-print" style="display:none;">
+                    Dr. Michele Valiante
+                </div>
             </div>
         </div>
 
@@ -640,55 +681,57 @@
         const printDateEl = document.getElementById('print-date');
         if(printDateEl) printDateEl.textContent = dateString;
 
+// --- GESTIONE MEDICO (Menu a tendina -> Stampa) ---
+        function updateDoctorSign() {
+            const select = document.getElementById('doctor-select');
+            const printDiv = document.getElementById('doctor-name-print');
+            // Copia il valore selezionato nel div di stampa
+            printDiv.textContent = select.value;
+        }
+
         // --- GESTIONE MLPA ---
         function toggleMlpa() {
             const checkbox = document.getElementById('mlpa-check');
             const inputBox = document.getElementById('mlpa-input-box');
             const printNote = document.getElementById('print-mlpa-note');
-            const printValue = document.getElementById('mlpa-print-value');
-
+            
             if (checkbox.checked) {
+                // Se spuntato: mostra input a schermo
                 inputBox.style.display = 'block';
-                // Sincronizza subito il testo per la stampa
-                printValue.textContent = document.getElementById('mlpa-text').value;
+                // La nota di stampa apparirà solo se c'è testo (gestito dall'event listener sotto)
+                // oppure se vogliamo che appaia vuota, mettiamo 'block'. 
+                // Meglio nasconderla finché non si scrive qualcosa o lasciarla visibile?
+                // Mettiamola visibile ma vuota, così si capisce che è attiva
+                printNote.style.display = 'block';
+                updateMlpaText(); // Sincronizza subito
             } else {
+                // Se non spuntato: nascondi tutto
                 inputBox.style.display = 'none';
-                printNote.style.display = 'none';
-                document.getElementById('mlpa-text').value = ''; // Pulisce
+                printNote.style.display = 'none'; 
+                document.getElementById('mlpa-text').value = ''; // Pulisce il campo
+                document.getElementById('mlpa-print-value').textContent = '';
             }
         }
 
-        // Ascolta anche mentre scrivi nel box MLPA per aggiornare la nota di stampa in tempo reale
-        document.getElementById('mlpa-text').addEventListener('input', function(e) {
-             document.getElementById('mlpa-print-value').textContent = e.target.value;
-             // Mostra la nota solo se c'è testo
-             const printNote = document.getElementById('print-mlpa-note');
-             if(e.target.value.trim() !== "") {
-                 printNote.style.display = "block";
-             } else {
-                 printNote.style.display = "none";
-             }
-        });
+        // Sincronizza testo MLPA mentre scrivi
+        document.getElementById('mlpa-text').addEventListener('input', updateMlpaText);
 
+        function updateMlpaText() {
+            const inputVal = document.getElementById('mlpa-text').value;
+            document.getElementById('mlpa-print-value').textContent = inputVal;
+        }
 
-        // --- DATA AUTOMATICA (FOOTER) ---
+        // --- DATA AUTOMATICA ---
         const todayDate = new Date();
-        // Formatta data come GG/MM/AAAA
         const formattedDate = todayDate.toLocaleDateString('it-IT', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
+            day: '2-digit', month: '2-digit', year: 'numeric'
         });
-        
-        // Inserisce la data nel footer firma
         const footerDateEl = document.getElementById('footer-date');
         if(footerDateEl) footerDateEl.textContent = formattedDate;
-
-        // Inserisce la data anche nel campo "Data di nascita" come placeholder o data predefinita se vuoi
-        // (Opzionale, qui lasciamo solo la data della firma come richiesto)
     </script>
 </body>
 </html>
+
 
 
 
