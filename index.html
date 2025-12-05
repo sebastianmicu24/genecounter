@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calcolatore Panel Genetici</title>
+    <title>Scheda Raccolta Dati Genetici</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -11,7 +11,7 @@
             --bg-color: #f4f7f6;
             --card-bg: #ffffff;
             --text-color: #333;
-            --border-color: #e0e0e0;
+            --border-color: #bdc3c7;
         }
 
         body {
@@ -20,10 +20,11 @@
             padding: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
-            padding-bottom: 60px; /* Space for footer */
+            padding-bottom: 60px;
         }
 
-        /* Sticky Header for Count */
+        /* --- STILI PER LO SCHERMO --- */
+        
         .sticky-header {
             position: sticky;
             top: 0;
@@ -51,105 +52,135 @@
             font-size: 1.2rem;
         }
 
+        .btn {
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 10px;
+            color: white;
+            transition: opacity 0.2s;
+        }
+
+        .btn-reset { background-color: #e74c3c; }
+        .btn-print { background-color: #27ae60; }
+        .btn:hover { opacity: 0.9; }
+
         .container {
-            max-width: 1200px;
+            max-width: 1000px; /* Ridotto leggermente per simulare A4 */
             margin: 20px auto;
             padding: 0 15px;
         }
 
-        /* Sections */
-        .section-title {
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 10px;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            color: var(--primary-color);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 1.1rem;
+        /* Logo e Intestazione Modulo */
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
         }
 
-        /* Panel List (Section A) */
+        .logo-placeholder {
+            max-height: 80px;
+            max-width: 200px;
+        }
+
+        /* Form Anagrafica */
+        .patient-form {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        /* Sezioni */
+        .section-title {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 1rem;
+        }
+
+        .section-desc {
+            font-size: 0.85rem;
+            font-style: italic;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        /* Panel List */
         .panel-list {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 10px;
-        }
-
-        @media (min-width: 768px) {
-            .panel-list {
-                grid-template-columns: 1fr 1fr;
-            }
+            gap: 8px;
         }
 
         .panel-item {
             background: var(--card-bg);
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             display: flex;
             align-items: flex-start;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .panel-item:hover {
-            background-color: #eef7fb;
-        }
-
-        .panel-item input[type="checkbox"] {
-            margin-top: 4px;
-            margin-right: 12px;
-            transform: scale(1.2);
-            cursor: pointer;
-        }
-
-        .panel-info {
-            font-size: 0.95rem;
         }
         
-        .panel-genes-preview {
-            display: block;
-            font-size: 0.8rem;
-            color: #777;
-            margin-top: 4px;
-        }
+        .panel-item input { margin-top: 3px; margin-right: 10px; }
+        .panel-label { font-weight: 600; font-size: 0.95rem; }
+        .panel-genes { display: block; font-size: 0.75rem; color: #666; margin-top: 2px; }
 
-        /* Genes Grid (Section B) */
+        /* Genes Grid */
         .genes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); /* Più compatto */
+            gap: 5px;
             background: var(--card-bg);
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .gene-item {
             display: flex;
             align-items: center;
-            font-size: 0.9rem;
-            padding: 4px;
-            border-radius: 4px;
+            font-size: 0.85rem;
         }
+        
+        .gene-item input { margin-right: 5px; }
 
-        .gene-item:hover {
-            background-color: #f0f0f0;
-        }
-
-        .gene-item input {
-            margin-right: 8px;
-            cursor: pointer;
-        }
-
-        .gene-item label {
-            cursor: pointer;
-            width: 100%;
-            user-select: none;
-        }
-
-        /* Selected List Output */
         .output-area {
             background-color: #fff;
             padding: 20px;
@@ -158,86 +189,230 @@
             border: 1px solid var(--border-color);
         }
 
-        .output-area h3 {
-            margin-top: 0;
-            font-size: 1rem;
-            color: #666;
-        }
+        /* --- MEDIA QUERY PER LA STAMPA --- */
+        @media print {
+            @page {
+                size: A4;
+                margin: 1cm;
+            }
 
-        #selected-genes-text {
-            font-family: monospace;
-            color: var(--primary-color);
-            line-height: 1.5;
-        }
+            body {
+                background-color: white;
+                color: black;
+                font-size: 11px; /* Font più piccolo per far stare tutto */
+                padding-bottom: 0;
+            }
 
-        .btn-reset {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            margin-left: 10px;
+            .sticky-header, .btn, .output-area {
+                display: none !important;
+            }
+
+            .container {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            .doc-header {
+                padding: 0;
+                margin-bottom: 10px;
+                border: none;
+            }
+
+            .doc-header h2 {
+                font-size: 16px;
+                text-transform: uppercase;
+                border-bottom: 2px solid black;
+                flex-grow: 1;
+                margin-left: 20px;
+                text-align: right;
+            }
+
+            /* Ricrea la griglia della tabella anagrafica */
+            .patient-form {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0;
+                padding: 0;
+                border: 1px solid black;
+                box-shadow: none;
+                margin-bottom: 15px;
+            }
+
+            .form-group {
+                border-bottom: 1px solid black;
+                border-right: 1px solid black;
+                padding: 5px;
+                page-break-inside: avoid;
+            }
+
+            .form-group input, .form-group select, .form-group textarea {
+                border: none;
+                padding: 0;
+                font-family: inherit;
+                font-weight: bold;
+                width: 100%;
+                font-size: 12px;
+                background: transparent;
+            }
+
+            .form-group label {
+                margin-bottom: 0;
+                font-size: 10px;
+                text-transform: uppercase;
+            }
+
+            /* Rimuove i bordi esterni inutili della griglia */
+            .form-group:nth-child(2n) { border-right: none; }
+            .form-group.full-width { border-right: none; }
+            .form-group:last-child { border-bottom: none; }
+
+            /* Compattare le liste per la stampa */
+            .section-title {
+                margin-top: 10px;
+                margin-bottom: 5px;
+                font-size: 12px;
+                border-bottom: 1px solid black;
+            }
+
+            .panel-list {
+                display: block; /* Rende la lista normale non grid per risparmiare spazio verticale se serve */
+                column-count: 1; 
+            }
+
+            .panel-item {
+                border: none;
+                padding: 2px 0;
+                background: none;
+                page-break-inside: avoid;
+            }
+
+            .panel-label { font-size: 11px; }
+            .panel-genes { font-size: 9px; }
+
+            /* Sezione B in colonne strette */
+            .genes-grid {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 2px;
+                padding: 0;
+                box-shadow: none;
+            }
+
+            .gene-item { font-size: 10px; }
+            .gene-item input { transform: scale(0.8); }
+
+            /* Firma a piè di pagina */
+            .print-footer {
+                display: block;
+                margin-top: 30px;
+                text-align: right;
+                font-weight: bold;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Fisso -->
+    <!-- Header Fisso (Solo Schermo) -->
     <div class="sticky-header">
         <div>
-            <h1>Richiesta Genetica</h1>
+            <h1>Genetics Calculator</h1>
         </div>
         <div style="display:flex; align-items:center;">
-            <span>TOTALE: &nbsp;</span>
+            <span>GENI TOTALI: &nbsp;</span>
             <span class="counter-box" id="total-count">0</span>
-            <button class="btn-reset" onclick="resetAll()">Reset</button>
+            <button class="btn btn-print" onclick="window.print()">Stampa Scheda</button>
+            <button class="btn btn-reset" onclick="resetAll()">Reset</button>
         </div>
     </div>
 
     <div class="container">
         
+        <!-- Intestazione Documento -->
+        <div class="doc-header">
+            <!-- INSERISCI QUI SOTTO L'URL DEL LOGO o LA STRINGA BASE64 -->
+            <img src="" alt="[LOGO OSPEDALE]" class="logo-placeholder" id="hospital-logo">
+            <h2 style="margin:0; color:#333;">SCHEDA RACCOLTA DATI</h2>
+        </div>
+
+        <!-- Anagrafica Paziente -->
+        <div class="patient-form">
+            <div class="form-group full-width">
+                <label>Cognome e Nome</label>
+                <input type="text" placeholder="Rossi Mario">
+            </div>
+            <div class="form-group">
+                <label>Data di Nascita</label>
+                <input type="text" placeholder="GG/MM/AAAA">
+            </div>
+            <div class="form-group">
+                <label>Sesso</label>
+                <select style="background:transparent; border:none; width:100%;">
+                    <option value="M">Maschio</option>
+                    <option value="F">Femmina</option>
+                </select>
+            </div>
+            <div class="form-group full-width">
+                <label>Origine</label>
+                <input type="text" placeholder="es. Italiana">
+            </div>
+            <div class="form-group full-width" style="border-bottom:none;">
+                <label>Indicazione Clinica / Albero Genealogico</label>
+                <textarea rows="2" placeholder="Inserire indicazione clinica..." style="resize:none;"></textarea>
+            </div>
+        </div>
+
+        <p class="section-desc">
+            Selezionare uno o più dei seguenti pannelli (Sez. A) e/o selezionare singoli geni (Sez. B).
+        </p>
+
         <!-- SEZIONE A: PANNELLI -->
         <h2 class="section-title">Sezione A: Pannelli</h2>
         <div class="panel-list" id="panel-container">
-            <!-- I pannelli vengono generati via JS qui -->
+            <!-- Generato via JS -->
         </div>
 
         <!-- SEZIONE B: SINGOLI GENI -->
-        <h2 class="section-title">Sezione B: Elenco Geni Completo</h2>
+        <h2 class="section-title">Sezione B: Elenco Geni</h2>
         <div class="genes-grid" id="genes-container">
-            <!-- I geni vengono generati via JS qui -->
+            <!-- Generato via JS -->
         </div>
 
-        <!-- OUTPUT FINALE -->
+        <!-- OUTPUT FINALE (Visibile solo a schermo) -->
         <div class="output-area">
-            <h3>Riepilogo (Lista per referto):</h3>
-            <div id="selected-genes-text">Nessun gene selezionato</div>
+            <h3>Lista per refertazione (Copia e Incolla):</h3>
+            <div id="selected-genes-text" style="font-family: monospace; color: var(--primary-color);">Nessun gene selezionato</div>
+        </div>
+
+        <!-- Footer solo per stampa -->
+        <div class="print-footer" style="display:none;">
+            <p>Dr. Michele Valiante<br>Data: <span id="print-date"></span></p>
         </div>
 
     </div>
 
     <script>
-        // Dati trascritti dall'immagine (Sezione A)
+        // --- LOGICA DATI ---
+
+        // Inserisci qui l'URL del logo se ne hai uno, es: "https://www.miosito.it/logo.png"
+        document.getElementById('hospital-logo').src = "https://via.placeholder.com/200x60?text=LOGO+OSPEDALE";
+
         const panelsData = [
-            { name: "Carcinoma Mammella (II Livello)", genes: ["ATM", "BARD1", "CDH1", "CHEK2", "NF1", "PALB2", "PTEN", "RAD51C", "RAD51D", "STK11", "TP53"] },
-            { name: "Carcinoma Ovaio (II Livello)", genes: ["ATM", "BRIP1", "MLH1", "MSH2", "MSH6", "PALB2", "PMS2", "RAD51C", "RAD51D"] },
-            { name: "Carcinoma Gastro-Intestinale (incl. GIST)", genes: ["ATM", "APC", "BMPR1A", "CDH1", "CHEK2", "DICER1", "EPCAM", "KIT", "MLH1", "MSH2", "MSH6", "MUTYH", "NF1", "NTHL1", "PDGFRA", "PMS2", "POLD1", "POLE", "PTEN", "SDHB", "SDHC", "SMAD4", "STK11"] },
-            { name: "Neoplasie Renali (incl. Sclerosi Tuberosa)", genes: ["FH", "FLCN", "MET", "TSC1", "TSC2", "VHL", "WT1"] },
-            { name: "Neoplasia Endocrina Multipla", genes: ["CDKN1B", "MEN1", "RET"] },
-            { name: "Sindrome di Li-Fraumeni", genes: ["TP53"] },
-            { name: "Neurofibromatosi Tipo 1", genes: ["NF1", "SPRED1"] },
-            { name: "Neurofibromatosi Tipo 2 / Schwannomatosi", genes: ["NF2", "LZTR1", "SMARCB1"] },
-            { name: "Feocromocitoma / Paranglioma", genes: ["MAX", "RET", "SDHA", "SDHAF2", "SDHB", "SDHC", "SDHD", "VHL"] },
-            { name: "Retinoblastoma", genes: ["RB1"] },
-            { name: "Carcinoma Pancreas", genes: ["ATM", "BRCA1", "BRCA2", "CDKN2A", "EPCAM", "MLH1", "MSH2", "MSH6", "PALB2", "PMS2", "STK11", "TP53"] },
-            { name: "Sindrome di Gorlin e basaliomi", genes: ["BAP1", "PTCH1", "SUFU"] },
-            { name: "Melanoma Esteso", genes: ["ACD", "ATM", "BAP1", "BRCA1", "BRCA2", "CDK4", "CDKN2A", "MITF", "POT1", "TERF2IP", "TERT"] }
+            { name: "CARCINOMA MAMMELLA (II Livello)", genes: ["ATM", "BARD1", "CDH1", "CHEK2", "NF1", "PALB2", "PTEN", "RAD51C", "RAD51D", "STK11", "TP53"] },
+            { name: "CARCINOMA OVAIO (II Livello)", genes: ["ATM", "BRIP1", "MLH1", "MSH2", "MSH6", "PALB2", "PMS2", "RAD51C", "RAD51D"] },
+            { name: "CARCINOMA GASTRO-INTESTINALE (incl. GIST)", genes: ["ATM", "APC", "BMPR1A", "CDH1", "CHEK2", "DICER1", "EPCAM", "KIT", "MLH1", "MSH2", "MSH6", "MUTYH", "NF1", "NTHL1", "PDGFRA", "PMS2", "POLD1", "POLE", "PTEN", "SDHB", "SDHC", "SMAD4", "STK11"] },
+            { name: "NEOPLASIE RENALI (incl. Sclerosi Tuberosa)", genes: ["FH", "FLCN", "MET", "TSC1", "TSC2", "VHL", "WT1"] },
+            { name: "NEOPLASIA ENDOCRINA MULTIPLA", genes: ["CDKN1B", "MEN1", "RET"] },
+            { name: "SINDROME DI LI-FRAUMENI", genes: ["TP53"] },
+            { name: "NEUROFIBROMATOSI TIPO 1", genes: ["NF1", "SPRED1"] },
+            { name: "NEUROFIBROMATOSI TIPO 2 / SCHWANNOMATOSI", genes: ["NF2", "LZTR1", "SMARCB1"] },
+            { name: "FEOCROMOCITOMA / PARAGANGLIOMA", genes: ["MAX", "RET", "SDHA", "SDHAF2", "SDHB", "SDHC", "SDHD", "VHL"] },
+            { name: "RETINOBLASTOMA", genes: ["RB1"] },
+            { name: "CARCINOMA PANCREAS", genes: ["ATM", "BRCA1", "BRCA2", "CDKN2A", "EPCAM", "MLH1", "MSH2", "MSH6", "PALB2", "PMS2", "STK11", "TP53"] },
+            { name: "SINDROME DI GORLIN", genes: ["BAP1", "PTCH1", "SUFU"] },
+            { name: "MELANOMA ESTESO", genes: ["ACD", "ATM", "BAP1", "BRCA1", "BRCA2", "CDK4", "CDKN2A", "MITF", "POT1", "TERF2IP", "TERT"] }
         ];
 
-        // Lista completa dei geni presenti nella Sezione B dell'immagine
-        // Ho incluso tutti quelli visibili nelle colonne
         const allGenesList = [
             "ACD", "AIP", "AKT1", "APC", "ATM", "BAP1", "BARD1", "BLM", "BMPR1A", 
             "BRCA1", "BRCA2", "BRIP1", "CASR", "CDC73", "CDH1", "CDK4", "CDKN1B", 
@@ -255,7 +430,7 @@
             "WT1", "XPA", "XPC", "XRCC2"
         ];
 
-        // Rimuove duplicati e ordina alfabeticamente per sicurezza
+        // Rimuove eventuali duplicati e ordina
         const uniqueGenes = [...new Set(allGenesList)].sort();
 
         const panelContainer = document.getElementById('panel-container');
@@ -270,8 +445,8 @@
             div.innerHTML = `
                 <input type="checkbox" id="panel-${index}" data-genes="${panel.genes.join(',')}">
                 <div>
-                    <label for="panel-${index}"><strong>${panel.name}</strong></label>
-                    <span class="panel-genes-preview">${panel.genes.join(', ')}</span>
+                    <span class="panel-label">${panel.name}</span>
+                    <span class="panel-genes">${panel.genes.join(', ')}</span>
                 </div>
             `;
             
@@ -284,9 +459,6 @@
                 genesToToggle.forEach(geneName => {
                     const geneCheckbox = document.getElementById(`gene-${geneName}`);
                     if (geneCheckbox) {
-                        // Se stiamo spuntando il panel, spuntiamo i geni.
-                        // Se togliamo la spunta al panel, togliamo la spunta ai geni 
-                        // (solo se non sono bloccati da altri panel? Per semplicità qui deselezioniamo).
                         geneCheckbox.checked = isChecked;
                     }
                 });
@@ -305,12 +477,12 @@
                 <label for="gene-${gene}">${gene}</label>
             `;
             
-            // Evento: Cambio manuale di un singolo gene
+            // Evento: Cambio manuale
             div.querySelector('input').addEventListener('change', updateCount);
             genesContainer.appendChild(div);
         });
 
-        // 3. FUNZIONE DI CONTEGGIO E AGGIORNAMENTO UI
+        // 3. FUNZIONE DI CONTEGGIO E AGGIORNAMENTO
         function updateCount() {
             const allGeneCheckboxes = document.querySelectorAll('.gene-checkbox');
             let count = 0;
@@ -334,14 +506,26 @@
             }
         }
 
-        // 4. FUNZIONE RESET
+        // 4. RESET TOTALE
         function resetAll() {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(box => box.checked = false);
-            updateCount();
+            if(confirm("Sei sicuro di voler resettare tutti i campi?")) {
+                // Reset checkbox
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(box => box.checked = false);
+                
+                // Reset campi testo
+                const inputs = document.querySelectorAll('input[type="text"], textarea, select');
+                inputs.forEach(input => input.value = "");
+                
+                updateCount();
+            }
         }
+
+        // 5. DATA ODIERNA PER LA STAMPA
+        const today = new Date();
+        const dateString = today.toLocaleDateString('it-IT');
+        document.getElementById('print-date').textContent = dateString;
 
     </script>
 </body>
 </html>
-
