@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolatore Panel Genetici</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 60px; /* Space for footer */
+        }
+
+        /* Sticky Header for Count */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sticky-header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+
+        .counter-box {
+            background-color: var(--accent-color);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* Sections */
+        .section-title {
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 1.1rem;
+        }
+
+        /* Panel List (Section A) */
+        .panel-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .panel-list {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel-item {
+            background: var(--card-bg);
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .panel-item:hover {
+            background-color: #eef7fb;
+        }
+
+        .panel-item input[type="checkbox"] {
+            margin-top: 4px;
+            margin-right: 12px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .panel-info {
+            font-size: 0.95rem;
+        }
+        
+        .panel-genes-preview {
+            display: block;
+            font-size: 0.8rem;
+            color: #777;
+            margin-top: 4px;
+        }
+
+        /* Genes Grid (Section B) */
+        .genes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 8px;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .gene-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .gene-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .gene-item input {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .gene-item label {
+            cursor: pointer;
+            width: 100%;
+            user-select: none;
+        }
+
+        /* Selected List Output */
+        .output-area {
+            background-color: #fff;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .output-area h3 {
+            margin-top: 0;
+            font-size: 1rem;
+            color: #666;
+        }
+
+        #selected-genes-text {
+            font-family: monospace;
+            color: var(--primary-color);
+            line-height: 1.5;
+        }
+
+        .btn-reset {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Fisso -->
+    <div class="sticky-header">
+        <div>
+            <h1>Richiesta Genetica</h1>
+            <span style="font-size: 0.8rem; opacity: 0.8;">Seleziona pannelli o singoli geni</span>
+        </div>
+        <div style="display:flex; align-items:center;">
+            <span>TOTALE: &nbsp;</span>
+            <span class="counter-box" id="total-count">0</span>
+            <button class="btn-reset" onclick="resetAll()">Reset</button>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <!-- SEZIONE A: PANNELLI -->
+        <h2 class="section-title">Sezione A: Pannelli</h2>
+        <div class="panel-list" id="panel-container">
+            <!-- I pannelli vengono generati via JS qui -->
+        </div>
+
+        <!-- SEZIONE B: SINGOLI GENI -->
+        <h2 class="section-title">Sezione B: Elenco Geni Completo</h2>
+        <div class="genes-grid" id="genes-container">
+            <!-- I geni vengono generati via JS qui -->
+        </div>
+
+        <!-- OUTPUT FINALE -->
+        <div class="output-area">
+            <h3>Riepilogo (Lista per referto):</h3>
+            <div id="selected-genes-text">Nessun gene selezionato</div>
+        </div>
+
+    </div>
+
+    <script>
+        // Dati trascritti dall'immagine (Sezione A)
+        const panelsData = [
+            { name: "Carcinoma Mammella (II Livello)", genes: ["ATM", "BARD1", "CDH1", "CHEK2", "NF1", "PALB2", "PTEN", "RAD51C", "RAD51D", "STK11", "TP53"] },
+            { name: "Carcinoma Ovaio (II Livello)", genes: ["ATM", "BRIP1", "MLH1", "MSH2", "MSH6", "PALB2", "PMS2", "RAD51C", "RAD51D"] },
+            { name: "Carcinoma Gastro-Intestinale (incl. GIST)", genes: ["ATM", "APC", "BMPR1A", "CDH1", "CHEK2", "DICER1", "EPCAM", "KIT", "MLH1", "MSH2", "MSH6", "MUTYH", "NF1", "NTHL1", "PDGFRA", "PMS2", "POLD1", "POLE", "PTEN", "SDHB", "SDHC", "SMAD4", "STK11"] },
+            { name: "Neoplasie Renali (incl. Sclerosi Tuberosa)", genes: ["FH", "FLCN", "MET", "TSC1", "TSC2", "VHL", "WT1"] },
+            { name: "Neoplasia Endocrina Multipla", genes: ["CDKN1B", "MEN1", "RET"] },
+            { name: "Sindrome di Li-Fraumeni", genes: ["TP53"] },
+            { name: "Neurofibromatosi Tipo 1", genes: ["NF1", "SPRED1"] },
+            { name: "Neurofibromatosi Tipo 2 / Schwannomatosi", genes: ["NF2", "LZTR1", "SMARCB1"] },
+            { name: "Feocromocitoma / Paranglioma", genes: ["MAX", "RET", "SDHA", "SDHAF2", "SDHB", "SDHC", "SDHD", "VHL"] },
+            { name: "Retinoblastoma", genes: ["RB1"] },
+            { name: "Carcinoma Pancreas", genes: ["ATM", "BRCA1", "BRCA2", "CDKN2A", "EPCAM", "MLH1", "MSH2", "MSH6", "PALB2", "PMS2", "STK11", "TP53"] },
+            { name: "Sindrome di Gorlin e basaliomi", genes: ["BAP1", "PTCH1", "SUFU"] },
+            { name: "Melanoma Esteso", genes: ["ACD", "ATM", "BAP1", "BRCA1", "BRCA2", "CDK4", "CDKN2A", "MITF", "POT1", "TERF2IP", "TERT"] }
+        ];
+
+        // Lista completa dei geni presenti nella Sezione B dell'immagine
+        // Ho incluso tutti quelli visibili nelle colonne
+        const allGenesList = [
+            "ACD", "AIP", "AKT1", "APC", "ATM", "BAP1", "BARD1", "BLM", "BMPR1A", 
+            "BRCA1", "BRCA2", "BRIP1", "CASR", "CDC73", "CDH1", "CDK4", "CDKN1B", 
+            "CDKN2A", "CEBPA", "CHEK2", "CTRC", "DDB2", "DICER1", "DIS3L2", "EPCAM", 
+            "ERCC1", "ERCC2", "ERCC3", "ERCC4", "ERCC5", "FAM175A", "FANCA", "FANCB", 
+            "FANCC", "FANCD2", "FANCE", "FANCF", "FANCG", "FANCI", "FANCL", "FANCM", 
+            "FH", "FLCN", "GALNT12", "GATA2", "GPC3", "GREM1", "HOXB13", "KIF1B", 
+            "KIT", "LZTR1", "MAX", "MEN1", "MET", "MITF", "MLH1", "MRE11A", "MSH2", 
+            "MSH3", "MSH6", "MUTYH", "NBN", "NF1", "NF2", "NSD1", "NTHL1", "PALB2", 
+            "PDGFRA", "PHOX2B", "PIK3CA", "PMS2", "POLD1", "POLE", "POT1", "PRKAR1A", 
+            "PTCH1", "PTEN", "RAD50", "RAD51", "RAD51B", "RAD51C", "RAD51D", "RB1", 
+            "RECQL4", "RET", "RHBDF2", "RINT1", "RUNX1", "SDHA", "SDHAF2", "SDHB", "SDHC", "SDHD", "SLX4", 
+            "SMAD4", "SMARCA4", "SMARCB1", "SMARCE1", "SPINK1", "SPRED1", "STK11", 
+            "SUFU", "TERF2IP", "TERT", "TMEM127", "TP53", "TSC1", "TSC2", "VHL", 
+            "WT1", "XPA", "XPC", "XRCC2"
+        ];
+
+        // Rimuove duplicati e ordina alfabeticamente per sicurezza
+        const uniqueGenes = [...new Set(allGenesList)].sort();
+
+        const panelContainer = document.getElementById('panel-container');
+        const genesContainer = document.getElementById('genes-container');
+        const totalCountSpan = document.getElementById('total-count');
+        const selectedGenesText = document.getElementById('selected-genes-text');
+
+        // 1. GENERAZIONE INTERFACCIA PANNELLI (SEZIONE A)
+        panelsData.forEach((panel, index) => {
+            const div = document.createElement('div');
+            div.className = 'panel-item';
+            div.innerHTML = `
+                <input type="checkbox" id="panel-${index}" data-genes="${panel.genes.join(',')}">
+                <div>
+                    <label for="panel-${index}"><strong>${panel.name}</strong></label>
+                    <span class="panel-genes-preview">${panel.genes.join(', ')}</span>
+                </div>
+            `;
+            
+            // Evento: Selezionando un pannello, seleziona i geni corrispondenti
+            const checkbox = div.querySelector('input');
+            checkbox.addEventListener('change', (e) => {
+                const genesToToggle = e.target.getAttribute('data-genes').split(',');
+                const isChecked = e.target.checked;
+                
+                genesToToggle.forEach(geneName => {
+                    const geneCheckbox = document.getElementById(`gene-${geneName}`);
+                    if (geneCheckbox) {
+                        // Se stiamo spuntando il panel, spuntiamo i geni.
+                        // Se togliamo la spunta al panel, togliamo la spunta ai geni 
+                        // (solo se non sono bloccati da altri panel? Per semplicità qui deselezioniamo).
+                        geneCheckbox.checked = isChecked;
+                    }
+                });
+                updateCount();
+            });
+
+            panelContainer.appendChild(div);
+        });
+
+        // 2. GENERAZIONE INTERFACCIA GENI (SEZIONE B)
+        uniqueGenes.forEach(gene => {
+            const div = document.createElement('div');
+            div.className = 'gene-item';
+            div.innerHTML = `
+                <input type="checkbox" id="gene-${gene}" class="gene-checkbox" value="${gene}">
+                <label for="gene-${gene}">${gene}</label>
+            `;
+            
+            // Evento: Cambio manuale di un singolo gene
+            div.querySelector('input').addEventListener('change', updateCount);
+            genesContainer.appendChild(div);
+        });
+
+        // 3. FUNZIONE DI CONTEGGIO E AGGIORNAMENTO UI
+        function updateCount() {
+            const allGeneCheckboxes = document.querySelectorAll('.gene-checkbox');
+            let count = 0;
+            let selectedList = [];
+
+            allGeneCheckboxes.forEach(box => {
+                if (box.checked) {
+                    count++;
+                    selectedList.push(box.value);
+                }
+            });
+
+            // Aggiorna numero header
+            totalCountSpan.textContent = count;
+
+            // Aggiorna testo riepilogo
+            if (selectedList.length > 0) {
+                selectedGenesText.textContent = selectedList.sort().join(', ');
+            } else {
+                selectedGenesText.textContent = "Nessun gene selezionato";
+            }
+        }
+
+        // 4. FUNZIONE RESET
+        function resetAll() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(box => box.checked = false);
+            updateCount();
+        }
+
+    </script>
+</body>
+</html>
