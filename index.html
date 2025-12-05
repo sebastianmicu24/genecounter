@@ -74,16 +74,20 @@
         }
 
         .logo-box {
-            width: 80px;
-            height: 80px;
+            width: 180px;        /* Aumentato da 80px a 180px */
+            height: 110px;       /* Aumentato da 80px a 110px */
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;    /* Evita che escano dai bordi */
         }
         
         .logo-box img {
-            max-width: 100%;
-            max-height: 100%;
+            width: auto;         /* Mantiene le proporzioni originali */
+            height: auto;
+            max-width: 100%;     /* Si adatta alla larghezza massima del box */
+            max-height: 100%;    /* Si adatta all'altezza massima del box */
+            object-fit: contain; /* Assicura che l'intero logo sia visibile */
         }
 
         .header-center-text {
@@ -487,4 +491,5 @@
     </script>
 </body>
 </html>
+
 
