@@ -224,22 +224,76 @@
         }
 
         /* --- STAMPA --- */
-        @media print {
-            @page { size: A4; margin: 10mm; }
+               @media print {
+            @page { 
+                size: A4; 
+                margin: 10mm; /* Margini ridotti per guadagnare spazio */
+            }
             
-            body { background-color: white; padding-bottom: 0; }
-            .sticky-header, .output-area { display: none !important; }
-            .container { 
-                width: 100%; margin: 0; padding: 0; box-shadow: none; max-width: none; 
+            body { 
+                background-color: white; 
+                padding-bottom: 0;
+                color: black;
             }
 
-            .sheet-header { border-bottom: none; }
+            /* Nasconde elementi inutili in stampa */
+            .sticky-header, .output-area, .btn { 
+                display: none !important; 
+            }
+
+            /* Contenitore a tutta pagina */
+            .container { 
+                width: 100%; 
+                margin: 0; 
+                padding: 0; 
+                box-shadow: none; 
+                max-width: none; 
+            }
+
+            .sheet-header { border-bottom: none; margin-bottom: 20px; }
             
+            /* Rimuove sfondi grigi per risparmiare inchiostro */
             .col-label { background-color: white !important; }
             .col-input input, .col-input select, .col-input textarea { border: none; }
 
-            .panel-container { display: block; column-count: 1; }
-            .genes-grid { grid-template-columns: repeat(8, 1fr); }
+            /* --- DIMENSIONI TESTO AUMENTATE --- */
+
+            /* Testo generale e Tabella Anagrafica */
+            .anagrafica-table, .col-input input, .meta-row {
+                font-size: 13px; /* Aumentato da 12px a 13px */
+            }
+            
+            .meta-bold {
+                font-size: 11px; /* Aumentato da 10px a 11px */
+            }
+
+            /* Intestazioni Sezioni */
+            .section-header {
+                font-size: 14px; /* Aumentato da 12px a 14px */
+                margin-top: 15px;
+            }
+
+            /* Lista Pannelli (Sezione A) */
+            .panel-container { 
+                display: block; 
+                column-count: 1; 
+                font-size: 12px; /* Aumentato da 11px a 12px */
+            }
+
+            .panel-item {
+                margin-bottom: 2px; /* Un po' più di respiro tra le righe */
+            }
+
+            /* Griglia Geni (Sezione B) */
+            .genes-grid { 
+                grid-template-columns: repeat(7, 1fr); /* 7 colonne invece di 8 per far stare il testo più grande */
+                font-size: 11px; /* Aumentato da 10px a 11px */
+                gap: 4px;
+            }
+            
+            .gene-item input {
+                transform: scale(0.9); /* Checkbox leggermente più visibili */
+            }
             
             /* Footer */
             .print-footer {
@@ -247,7 +301,9 @@
                 bottom: 0;
                 width: 100%;
                 text-align: right;
-                font-size: 10px;
+                font-size: 11px;
+                padding-bottom: 10px;
+                background: white; /* Per coprire eventuale testo che scorre sotto */
             }
         }
     </style>
@@ -491,5 +547,6 @@
     </script>
 </body>
 </html>
+
 
 
