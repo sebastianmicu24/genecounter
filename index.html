@@ -548,7 +548,7 @@
     </div>
 
     <script>
-        // DATI
+        // --- 1. DATI E CONFIGURAZIONE ---
         const panelsData = [
             { name: "CARCINOMA MAMMELLA (II LIVELLO)", genes: ["ATM", "BARD1", "CDH1", "CHEK2", "NF1", "PALB2", "PTEN", "RAD51C", "RAD51D", "STK11", "TP53"] },
             { name: "CARCINOMA OVAIO (II LIVELLO)", genes: ["ATM", "BRIP1", "MLH1", "MSH2", "MSH6", "PALB2", "PMS2", "RAD51C", "RAD51D"] },
@@ -582,7 +582,7 @@
             "WT1", "XPA", "XPC", "XRCC2"
         ];
 
-        // Ordina e rimuove duplicati
+        // Rimuove duplicati e ordina
         const uniqueGenes = [...new Set(allGenesList)].sort();
 
         const panelContainer = document.getElementById('panel-container');
@@ -590,7 +590,9 @@
         const totalCountSpan = document.getElementById('total-count');
         const selectedGenesText = document.getElementById('selected-genes-text');
 
-        // --- 1. POPOLA LA SEZIONE A (PANNELLI) ---
+        // --- 2. GENERAZIONE INTERFACCIA ---
+        
+        // Pannelli (Sez. A)
         panelsData.forEach((panel, index) => {
             const div = document.createElement('div');
             div.className = 'panel-item';
@@ -602,26 +604,22 @@
                 </div>
             `;
             
-            // Logica: quando clicco un pannello, accendo/spengo i relativi geni in Sezione B
+            // Logica: spunta panel -> spunta geni
             const checkbox = div.querySelector('input');
             checkbox.addEventListener('change', (e) => {
                 const genesToToggle = e.target.getAttribute('data-genes').split(',');
                 const isChecked = e.target.checked;
                 
                 genesToToggle.forEach(geneName => {
-                    // Trova il checkbox corrispondente nella Sezione B
                     const geneCheckbox = document.getElementById(`gene-${geneName}`);
-                    if (geneCheckbox) {
-                        geneCheckbox.checked = isChecked;
-                    }
+                    if (geneCheckbox) geneCheckbox.checked = isChecked;
                 });
-                updateCount(); // Ricalcola il totale
+                updateCount();
             });
-
             panelContainer.appendChild(div);
         });
 
-        // --- 2. POPOLA LA SEZIONE B (TUTTI I GENI) ---
+        // Geni Singoli (Sez. B)
         uniqueGenes.forEach(gene => {
             const div = document.createElement('div');
             div.className = 'gene-item';
@@ -629,13 +627,12 @@
                 <input type="checkbox" id="gene-${gene}" class="gene-checkbox" value="${gene}">
                 <label for="gene-${gene}">${gene}</label>
             `;
-            
-            // Se clicco un singolo gene manuale, aggiorno il conteggio
             div.querySelector('input').addEventListener('change', updateCount);
             genesContainer.appendChild(div);
         });
 
-        // --- 3. CALCOLO TOTALE E LISTA TESTUALE ---
+        // --- 3. FUNZIONI LOGICHE ---
+
         function updateCount() {
             const allGeneCheckboxes = document.querySelectorAll('.gene-checkbox');
             let count = 0;
@@ -648,10 +645,8 @@
                 }
             });
 
-            // Aggiorna l'header
             totalCountSpan.textContent = count;
 
-            // Aggiorna la lista testuale in fondo
             if (selectedList.length > 0) {
                 selectedGenesText.textContent = selectedList.sort().join(', ');
             } else {
@@ -659,7 +654,6 @@
             }
         }
 
-        // --- 4. FUNZIONE RESET ---
         function resetAll() {
             if(confirm("Vuoi cancellare tutte le selezioni e i dati inseriti?")) {
                 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
@@ -668,66 +662,69 @@
                 const inputs = document.querySelectorAll('input[type="text"], textarea');
                 inputs.forEach(input => input.value = "");
                 
+                // Resetta anche MLPA e tendina medico
+                document.getElementById('doctor-select').selectedIndex = 0;
+                updateDoctorSign();
+                toggleMlpa(); // Rilancia la logica per nascondere i campi MLPA
+                
                 updateCount();
             }
         }
 
-        // --- 5. DATA PER LA STAMPA ---
-        const today = new Date();
-        const dateString = today.toLocaleDateString('it-IT');
-        const printDateEl = document.getElementById('print-date');
-        if(printDateEl) printDateEl.textContent = dateString;
-
-// --- GESTIONE MEDICO (Menu a tendina -> Stampa) ---
+        // --- 4. GESTIONE MEDICO (Menu -> Stampa) ---
         function updateDoctorSign() {
             const select = document.getElementById('doctor-select');
             const printDiv = document.getElementById('doctor-name-print');
-            // Copia il valore selezionato nel div di stampa
             printDiv.textContent = select.value;
         }
 
-        // --- GESTIONE MLPA ---
+        // --- 5. GESTIONE MLPA ---
         function toggleMlpa() {
             const checkbox = document.getElementById('mlpa-check');
             const inputBox = document.getElementById('mlpa-input-box');
             const printNote = document.getElementById('print-mlpa-note');
             
             if (checkbox.checked) {
-                // Se spuntato: mostra input a schermo
                 inputBox.style.display = 'block';
-                // La nota di stampa apparirà solo se c'è testo (gestito dall'event listener sotto)
-                // oppure se vogliamo che appaia vuota, mettiamo 'block'. 
-                // Meglio nasconderla finché non si scrive qualcosa o lasciarla visibile?
-                // Mettiamola visibile ma vuota, così si capisce che è attiva
                 printNote.style.display = 'block';
-                updateMlpaText(); // Sincronizza subito
+                updateMlpaText();
             } else {
-                // Se non spuntato: nascondi tutto
                 inputBox.style.display = 'none';
                 printNote.style.display = 'none'; 
-                document.getElementById('mlpa-text').value = ''; // Pulisce il campo
+                document.getElementById('mlpa-text').value = '';
                 document.getElementById('mlpa-print-value').textContent = '';
             }
         }
 
-        // Sincronizza testo MLPA mentre scrivi
-        document.getElementById('mlpa-text').addEventListener('input', updateMlpaText);
+        // Sincronizza testo MLPA in tempo reale
+        const mlpaInput = document.getElementById('mlpa-text');
+        if(mlpaInput) {
+            mlpaInput.addEventListener('input', updateMlpaText);
+        }
 
         function updateMlpaText() {
             const inputVal = document.getElementById('mlpa-text').value;
             document.getElementById('mlpa-print-value').textContent = inputVal;
         }
 
-        // --- DATA AUTOMATICA ---
-        const todayDate = new Date();
-        const formattedDate = todayDate.toLocaleDateString('it-IT', {
-            day: '2-digit', month: '2-digit', year: 'numeric'
-        });
-        const footerDateEl = document.getElementById('footer-date');
-        if(footerDateEl) footerDateEl.textContent = formattedDate;
+        // --- 6. DATA AUTOMATICA NEL FOOTER ---
+        // Questa funzione viene eseguita immediatamente al caricamento della pagina
+        (function setFooterDate() {
+            const todayDate = new Date();
+            const formattedDate = todayDate.toLocaleDateString('it-IT', {
+                day: '2-digit', month: '2-digit', year: 'numeric'
+            });
+            const footerDateEl = document.getElementById('footer-date');
+            if(footerDateEl) {
+                footerDateEl.textContent = formattedDate;
+            }
+        })();
+
+        // Inizializza il nome del medico corretto (nel caso il browser salvi la selezione al refresh)
+        updateDoctorSign();
+
     </script>
-</body>
-</html>
+
 
 
 
