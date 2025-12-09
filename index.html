@@ -331,12 +331,12 @@
             .meta-bold { font-size: 11px; }
             .section-header { font-size: 14px; margin-top: 15px; }
 
-            .panel-container { display: block; column-count: 1; font-size: 12px; }
+            .panel-container { display: flex; flex-direction: column; gap: 0; font-size: 12px; }
             .panel-item { margin-bottom: 2px; }
 
-            .genes-grid { 
-                grid-template-columns: repeat(7, 1fr); 
-                font-size: 11px; 
+            .genes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+                font-size: 11px;
                 gap: 4px;
             }
             .gene-item input { transform: scale(0.9); }
@@ -348,6 +348,12 @@
             #print-mlpa-note { margin-top: 10px; font-size: 12px; font-weight: bold; }
 
             .signature-footer { margin-top: 50px; }
+        }
+
+        /* Force consistent print layout for mobile devices */
+        @media print {
+            .panel-container { display: flex !important; flex-direction: column !important; }
+            .genes-grid { grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)) !important; }
         }
     </style>
 </head>
