@@ -316,9 +316,11 @@
                 display: none !important; 
             }
 
-            /* Contenitore a tutta pagina */
-            .container { 
-                width: 100%; margin: 0; padding: 0; box-shadow: none; max-width: none; 
+            /* Contenitore scalato a 80% per adattarsi meglio */
+            .container {
+                width: 100%; margin: 0; padding: 0; box-shadow: none; max-width: none;
+                transform: scale(0.8);
+                transform-origin: top left;
             }
 
             .sheet-header { border-bottom: none; margin-bottom: 20px; }
@@ -326,28 +328,28 @@
             .col-label { background-color: white !important; }
             .col-input input, .col-input select, .col-input textarea { border: none; }
 
-            /* Testi ingranditi per stampa */
-            .anagrafica-table, .col-input input, .meta-row { font-size: 13px; }
-            .meta-bold { font-size: 11px; }
-            .section-header { font-size: 14px; margin-top: 15px; }
+            /* Testi ridotti per adattarsi a una pagina */
+            .anagrafica-table, .col-input input, .meta-row { font-size: 12px; }
+            .meta-bold { font-size: 10px; }
+            .section-header { font-size: 13px; margin-top: 15px; }
 
-            .panel-container { display: flex; flex-direction: column; gap: 0; font-size: 12px; }
+            .panel-container { display: flex; flex-direction: column; gap: 0; font-size: 11px; }
             .panel-item { margin-bottom: 2px; }
 
             .genes-grid {
                 grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-                font-size: 11px;
+                font-size: 10px;
                 gap: 4px;
             }
             .gene-item input { transform: scale(0.9); }
-            
-            /* Mostra elementi solo stampa */
-            .doctor-name-print { display: block !important; }
-            
-            /* Gestione nota MLPA */
-            #print-mlpa-note { margin-top: 10px; font-size: 12px; font-weight: bold; }
 
-            .signature-footer { margin-top: 50px; }
+            /* Mostra elementi solo stampa */
+            .doctor-name-print { display: block !important; font-size: 14px; }
+
+            /* Gestione nota MLPA */
+            #print-mlpa-note { margin-top: 10px; font-size: 10px; font-weight: bold; }
+
+            .signature-footer { margin-top: 40px; }
         }
 
         /* Force consistent print layout for mobile devices */
