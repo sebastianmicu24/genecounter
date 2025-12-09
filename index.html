@@ -110,16 +110,16 @@
         /* --- BOX TITOLO ISTRUZIONI --- */
         .title-row {
             display: flex;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             border: var(--border-black);
-            width:99%;
+            width:100%;
             margin-left:auto;
             margin-right: auto;;
         }
 
         .main-title-box {
             flex-grow: 1;
-            padding:5px;
+            padding:10px;
             text-align: center;
             border-right: var(--border-black);
             display: flex;
@@ -151,7 +151,7 @@
 
         /* --- TABELLA ANAGRAFICA --- */
         .anagrafica-table {
-            width: 99%;
+            width: 100%;
             border-collapse: collapse;
             margin-bottom: 10px;
             font-size: 12px;
@@ -161,7 +161,7 @@
 
         .anagrafica-table td {
             border: var(--border-black);
-            padding: 5px 10px;
+            padding: px 10px;
             vertical-align: middle;
         }
 
@@ -169,20 +169,31 @@
             background-color: #f0f0f0; /* Grigio a schermo */
             font-weight: bold;
             width: 140px;
+            padding-left:5px;
         }
 
         .col-input input, .col-input select, .col-input textarea {
             width: 100%;
             border: 1px solid #ddd; /* Bordo leggero a schermo */
-            padding: 5px;
             font-family: inherit;
             font-size: 12px;
             background: transparent;
+            margin-left: auto;
+            margin-right:auto;
         }
 
         .checkbox-group {
             display: flex;
             gap: 20px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding-left: 5px;
+            padding-right:5px;
         }
         
         /* --- SEZIONI GENI --- */
@@ -265,7 +276,7 @@
 
         .handwritten-date {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 16px;
+            font-size: 14px;
             margin-left: 10px;
             border-bottom: 1px solid #000;
             padding: 0 5px;
