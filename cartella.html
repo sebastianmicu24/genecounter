@@ -20,7 +20,7 @@
             height: 297mm;
             padding: 10mm 15mm;
             margin: 10mm auto;
-            background: white;
+            background: rgb(255, 255, 255);
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
             position: relative;
@@ -37,7 +37,7 @@
         /* --- Download Button --- */
         .download-button {
             position: fixed;
-            top: 20px;
+            bottom: 20px;
             right: 20px;
             background-color: #1e3a5f;
             color: white;
@@ -273,6 +273,9 @@
     </style>
 </head>
 <body>
+
+    <!-- Download Button -->
+    <button class="download-button" onclick="downloadPDF()">📄 Scarica PDF</button>
 
     <div class="page">
         
