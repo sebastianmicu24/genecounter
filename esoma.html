@@ -112,6 +112,92 @@
             color: #999;
         }
 
+        .gene-input {
+            border-bottom: 1px solid #000;
+            min-height: 25px;
+            padding: 2px 5px;
+            cursor: text;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .gene-input:focus {
+            outline: 1px solid #2885da;
+            background-color: #f9f9f9;
+        }
+
+        .gene-input:empty:before {
+            content: attr(data-placeholder);
+            color: #999;
+        }
+
+        #hpo-autocomplete {
+            position: fixed;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 10000;
+            min-width: 500px;
+        }
+
+        .hpo-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+
+        .hpo-item:hover,
+        .hpo-item.selected {
+            background-color: #2885da;
+            color: white;
+        }
+
+        .hpo-item-id {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #2885da;
+        }
+
+        .hpo-item:hover .hpo-item-id,
+        .hpo-item.selected .hpo-item-id {
+            color: white;
+        }
+
+        .hpo-item-name {
+            font-size: 0.95em;
+        }
+
+        #hpo-tooltip {
+            position: fixed;
+            background: #333;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            max-width: 400px;
+            z-index: 10001;
+            font-size: 0.9em;
+            line-height: 1.4;
+            display: none;
+            pointer-events: none;
+        }
+
+        #hpo-tooltip::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-right: 8px solid #333;
+        }
+
         @media print {
             input[type="text"],
             input[type="date"],
@@ -420,10 +506,15 @@
 
         <!-- Analisi Geni -->
         <div class="section-label">Analisi dei seguenti geni</div>
-        <input type="text" name="geni_1" class="write-line" style="margin-top: 5px;" />
-        <input type="text" name="geni_2" class="write-line" />
-        <input type="text" name="geni_3" class="write-line" />
-        <input type="text" name="geni_4" class="write-line" />
+        <input type="text" id="hpo-input-1" class="gene-input-hpo write-line"  style="margin-top: 5px;" />
+        <input type="text" id="hpo-input-2" class="gene-input-hpo write-line"  />
+        <input type="text" id="hpo-input-3" class="gene-input-hpo write-line"  />
+        <input type="text" id="hpo-input-4" class="gene-input-hpo write-line"  />
+        
+        <!-- HPO Autocomplete Dropdown -->
+        <div id="hpo-autocomplete" style="display: none;"></div>
+        <!-- HPO Tooltip for descriptions -->
+        <div id="hpo-tooltip"></div>
 
         <!-- Footer -->
         <div class="footer">
@@ -434,24 +525,223 @@
                 <div class="footer-line">TIMBRO/FIRMA MEDICO RICHIEDENTE</div>
             </div>
         </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayString = `${year}-${month}-${day}`;
+        
+        const dataFirma = document.querySelector('input[name="data_firma"]');
+        if (dataFirma) {
+            dataFirma.value = todayString;
+        }
 
-    </div>
+        // HPO Autocomplete
+        const geneInputs = document.querySelectorAll('.gene-input-hpo');
+        const autocompleteDiv = document.getElementById('hpo-autocomplete');
+        let currentInput = null;
+        let selectedIndex = -1;
+        let hpoResults = [];
+        let debounceTimer = null;
 
-    <script>
-        // Set today's date as default for the footer date field
-        document.addEventListener('DOMContentLoaded', function() {
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            const todayString = `${year}-${month}-${day}`;
-            
-            // Set default date for footer
-            const dataFirma = document.querySelector('input[name="data_firma"]');
-            if (dataFirma) {
-                dataFirma.value = todayString;
+        async function fetchHPO(searchTerm) {
+            if (!searchTerm || searchTerm.length < 2) {
+                hideAutocomplete();
+                return;
             }
+
+            try {
+                // Use df for display fields and ef for extra field (definition)
+                const url = `https://clinicaltables.nlm.nih.gov/api/hpo/v3/search?terms=${encodeURIComponent(searchTerm)}&maxList=10&df=id,name&ef=definition`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                // data[2] contains extra fields (definition)
+                // data[3] contains display fields [[id, name], ...]
+                if (data && data[1] && data[3]) {
+                    hpoResults = data[1].map((code, index) => ({
+                        code: code,
+                        name: data[3][index][1] || data[3][index][0],
+                        definition: (data[2] && data[2].definition && data[2].definition[index]) || 'No description available'
+                    }));
+                    displayAutocomplete();
+                } else {
+                    hideAutocomplete();
+                }
+            } catch (error) {
+                console.error('HPO API error:', error);
+                hideAutocomplete();
+            }
+        }
+
+        function displayAutocomplete() {
+            if (hpoResults.length === 0) {
+                hideAutocomplete();
+                return;
+            }
+
+            autocompleteDiv.innerHTML = hpoResults.map((item, index) => `
+                <div class="hpo-item" data-index="${index}" data-definition="${item.definition.replace(/"/g, '&quot;')}">
+                    <span class="hpo-item-id">${item.code}</span>
+                    <span class="hpo-item-name">${item.name}</span>
+                </div>
+            `).join('');
+
+            // Use fixed positioning for better visibility
+            const rect = currentInput.getBoundingClientRect();
+            
+            autocompleteDiv.style.left = rect.left + 'px';
+            autocompleteDiv.style.top = (rect.bottom + 2) + 'px';
+            autocompleteDiv.style.display = 'block';
+            autocompleteDiv.style.width = Math.max(500, rect.width) + 'px';
+
+            // Adjust if dropdown goes off screen
+            setTimeout(() => {
+                const dropdownRect = autocompleteDiv.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
+                
+                if (dropdownRect.bottom > viewportHeight) {
+                    // Show above input instead
+                    autocompleteDiv.style.top = (rect.top - dropdownRect.height - 2) + 'px';
+                }
+            }, 10);
+
+            selectedIndex = -1;
+
+            // Add hover and click handlers
+            document.querySelectorAll('.hpo-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    selectHPO(parseInt(this.dataset.index));
+                });
+                
+                // Show tooltip on hover
+                item.addEventListener('mouseenter', function(e) {
+                    showTooltip(this, this.dataset.definition);
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    hideTooltip();
+                });
+            });
+        }
+
+        function hideAutocomplete() {
+            autocompleteDiv.style.display = 'none';
+            hideTooltip();
+            hpoResults = [];
+            selectedIndex = -1;
+        }
+
+        function showTooltip(element, definition) {
+            const tooltip = document.getElementById('hpo-tooltip');
+            tooltip.textContent = definition;
+            tooltip.style.display = 'block';
+            
+            const itemRect = element.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+            
+            // Position to the right of the item
+            tooltip.style.left = (itemRect.right + 15) + 'px';
+            tooltip.style.top = itemRect.top + 'px';
+            
+            // Check if tooltip goes off right edge of screen
+            const tooltipRight = itemRect.right + 15 + tooltipRect.width;
+            if (tooltipRight > window.innerWidth) {
+                // Show on left side instead
+                tooltip.style.left = (itemRect.left - tooltipRect.width - 15) + 'px';
+            }
+        }
+
+        function hideTooltip() {
+            const tooltip = document.getElementById('hpo-tooltip');
+            if (tooltip) {
+                tooltip.style.display = 'none';
+            }
+        }
+
+        function selectHPO(index) {
+            if (index >= 0 && index < hpoResults.length) {
+                const selected = hpoResults[index];
+                const text = `${selected.code} - ${selected.name}`;
+                
+                const value = currentInput.value;
+                const atIndex = value.lastIndexOf('@');
+                const beforeAt = value.substring(0, atIndex);
+                currentInput.value = beforeAt + text + ' ';
+                
+                hideAutocomplete();
+                currentInput.focus();
+            }
+        }
+
+        geneInputs.forEach(input => {
+            input.addEventListener('input', function(e) {
+                const text = this.value;
+                const atIndex = text.lastIndexOf('@');
+                
+                if (atIndex !== -1) {
+                    currentInput = this;
+                    const query = text.substring(atIndex + 1);
+                    
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        fetchHPO(query);
+                    }, 300);
+                } else {
+                    hideAutocomplete();
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (autocompleteDiv.style.display === 'block') {
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        selectedIndex = Math.min(selectedIndex + 1, hpoResults.length - 1);
+                        updateSelection();
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        selectedIndex = Math.max(selectedIndex - 1, -1);
+                        updateSelection();
+                    } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                        e.preventDefault();
+                        selectHPO(selectedIndex);
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        hideAutocomplete();
+                    }
+                }
+            });
         });
+
+        function updateSelection() {
+            document.querySelectorAll('.hpo-item').forEach((item, index) => {
+                if (index === selectedIndex) {
+                    item.classList.add('selected');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.gene-input-hpo') && !e.target.closest('#hpo-autocomplete')) {
+        hideAutocomplete();
+    }
+});
+
+// Reposition dropdown on window resize
+window.addEventListener('resize', function() {
+    if (autocompleteDiv.style.display === 'block' && currentInput) {
+        const rect = currentInput.getBoundingClientRect();
+        autocompleteDiv.style.left = rect.left + 'px';
+        autocompleteDiv.style.top = (rect.bottom + 2) + 'px';
+    }
+});
+});
+</script>
+
     </script>
 
 </body>
