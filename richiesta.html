@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulo Richiesta Prestazioni Genetiche - Compilabile</title>
+    <!-- Libreria per generare il PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* --- Reset e Impostazioni Base --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            font-size: 9pt;
+            color: #000;
+        }
+
+        /* --- Configurazione Foglio A4 --- */
+        .page {
+            width: 210mm;
+            min-height: auto;
+            padding: 10mm;
+            margin: 10mm auto;
+            background: white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* --- Input Compilabili --- */
+        input[type="text"] {
+            border: none;
+            border-bottom: 1px dotted #000;
+            background: transparent;
+            font-family: Arial, sans-serif;
+            font-size: 9pt;
+            padding: 0 2px;
+            outline: none;
+            flex-grow: 1;
+            min-width: 20px;
+        }
+        
+        input[type="text"]:focus {
+            background-color: #f0f8ff; /* Leggero azzurro quando attivo */
+        }
+
+        input[type="checkbox"] {
+            transform: scale(1.1);
+            margin-right: 5px;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+
+        /* --- Utility Classes --- */
+        .bold { font-weight: bold; }
+        .center { text-align: center; }
+        .uppercase { text-transform: uppercase; }
+        .flex { display: flex; }
+        .flex-end { justify-content: flex-end; }
+        .space-between { justify-content: space-between; }
+        .align-center { align-items: center; }
+        .w-100 { width: 100%; }
+        .w-50 { width: 50%; }
+        
+        .border-box { border: 1px solid #000; }
+        .bg-gray { background-color: #e0e0e0; }
+
+        /* --- Scelte Interattive (SI/NO, M/F) --- */
+        .choice-box {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        .choice-item {
+            border: 1px solid #000;
+            padding: 2px 6px;
+            font-size: 8pt;
+            font-weight: bold;
+            margin-left: -1px;
+            background: white;
+            transition: background 0.2s;
+        }
+        /* Classe applicata via JS quando selezionato */
+        .choice-item.selected {
+            background-color: #000;
+            color: #fff;
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #000;
+            padding: 10px;
+            margin-bottom: 5px;
+        }
+        .logo-placeholder {
+            width: 80px;
+            height: 50px;
+            border: 1px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: #999;
+        }
+
+        /* --- Sezioni Principali --- */
+        .section-header {
+            background-color: #dcdcdc;
+            border: 1px solid #000;
+            padding: 3px 5px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 10pt;
+            margin-top: -1px;
+        }
+
+        .main-container { border: 1px solid #000; }
+
+        /* --- Righe e Colonne --- */
+        .row { display: flex; border-bottom: 1px solid #000; }
+        .row:last-child { border-bottom: none; }
+
+        .col { padding: 5px; }
+        .col-border-right { border-right: 1px solid #000; }
+
+        /* Text Input Rows */
+        .input-row {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 4px;
+            line-height: 1.4;
+            width: 100%;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            margin-top: 15px;
+            font-size: 7pt;
+            text-align: center;
+            color: #333;
+        }
+
+        /* --- Bottone Download --- */
+        #downloadBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        #downloadBtn:hover {
+            background-color: #004494;
+        }
+
+        /* Nascondi bottone in fase di stampa/pdf */
+        @media print {
+            body { background: none; margin: 0; }
+            .page { margin: 0; box-shadow: none; width: 100%; height: auto; min-height: 0; page-break-after: avoid; padding: 5mm; }
+            #downloadBtn { display: none; }
+            input[type="text"] { background: transparent !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Area da convertire in PDF -->
+    <div class="page" id="element-to-print">
+        
+        <!-- HEADER -->
+        <div class="header">
+            <div class="logo-placeholder">LOGO<br>SAPIENZA</div>
+            <div class="center">
+                <div class="bold" style="font-size: 11pt;">U.O.C. LABORATORIO DI GENETICA MEDICA</div>
+                <div style="font-size: 8pt;">DIRETTORE: PROF. PAOLA GRAMMATICO</div>
+            </div>
+            <div class="logo-placeholder">LOGO<br>OSPEDALE</div>
+        </div>
+
+        <div class="flex flex-end" style="font-size: 8pt; margin-bottom: 2px;">
+            Mod. LGM R-PGEN Rev.1 07/09/2022
+        </div>
+
+        <!-- MAIN TITLE -->
+        <div class="section-header">MODULO RICHIESTA PRESTAZIONI GENETICHE</div>
+
+        <div class="main-container">
+
+            <!-- SEZIONE 1: STRUTTURA INVIANTE -->
+            <div class="row">
+                <div class="col col-border-right w-50">
+                    <div class="input-row">STRUTTURA INVIANTE: <input type="text"></div>
+                    <div class="input-row">U.O. <input type="text"></div>
+                    <div class="input-row">C. di COSTO <input type="text"></div>
+                    <div class="input-row">
+                        TEL. <input type="text">
+                        FAX <input type="text">
+                    </div>
+                    <div class="input-row">DATA RICHIESTA/INVIO CAMPIONI <input type="text"></div>
+                </div>
+                <div class="col w-50" style="display:flex; flex-direction:column; justify-content:space-between;">
+                    <div style="font-size: 8pt;">TIMBRO/FIRMA MEDICO RIFERIMENTO</div>
+                    <div style="height: 40px; border-bottom: 1px dotted #000; margin-top: 20px;"></div>
+                    <div class="input-row">TEL. <input type="text"></div>
+                </div>
+            </div>
+
+            <!-- SEZIONE 2: DATI PAZIENTE -->
+            <div class="section-header" style="border-left:none; border-right:none;">DATI PAZIENTE</div>
+            <div class="row" style="display: block; padding: 5px;">
+                <div class="flex space-between align-center" style="margin-bottom: 5px;">
+                    <div class="input-row" style="flex-grow: 1; margin-bottom:0; margin-right: 10px;">COGNOME <input type="text"></div>
+                    <div class="input-row" style="flex-grow: 1; margin-bottom:0;">NOME <input type="text"></div>
+                    
+                    <div class="flex align-center" style="margin-left: 10px;">
+                        sesso
+                        <div class="choice-box" onclick="toggleSelection(this)">
+                            <div class="choice-item">M</div>
+                            <div class="choice-item">F</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-between align-center">
+                    <div class="w-100">
+                        <div class="input-row">
+                            DATA DI NASCITA <input type="text" style="width: 40px; text-align: center; flex-grow: 0;">/
+                            <input type="text" style="width: 40px; text-align: center; flex-grow: 0;">/
+                            <input type="text" style="width: 60px; text-align: center; flex-grow: 0;">
+                            &nbsp; LUOGO DI NASCITA <input type="text">
+                        </div>
+                    </div>
+                    <div style="white-space: nowrap; margin-left: 10px;">
+                        <input type="checkbox"> IN GRAVIDANZA<br>
+                        <div class="flex align-center">(U.M.: <input type="text" style="width: 60px;">)</div>
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    NAZIONE <input type="text">
+                    TEL. <input type="text">
+                </div>
+            </div>
+
+            <!-- SEZIONE 3: CONSULENZA E UOC -->
+            <div class="row" style="border-top: 1px solid #000;">
+                <!-- Colonna Sinistra -->
+                <div class="col col-border-right w-50">
+                    <div class="flex space-between align-center bold" style="margin-bottom: 5px;">
+                        RICHIESTA CONSULENZA GENETICA
+                        <div class="choice-box" onclick="toggleSelection(this)">
+                            <div class="choice-item">SI</div>
+                            <div class="choice-item">NO</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">Data richiesta <input type="text"></div>
+                    
+                    <div class="flex align-center" style="margin: 5px 0;">
+                        URGENTE: 
+                        <div class="choice-box" onclick="toggleSelection(this)">
+                            <div class="choice-item">SI</div>
+                            <div class="choice-item">NO</div>
+                        </div>
+                    </div>
+
+                    <div style="font-weight: bold; margin-top: 5px;">PER REPARTI OSPEDALE SAN CAMILLO:</div>
+                    <div class="flex space-between" style="font-size: 8pt; margin: 3px 0;">
+                        <span><input type="checkbox"> ENTRO 24 H</span>
+                        <span><input type="checkbox"> A LETTO</span>
+                        <span><input type="checkbox"> IN AMBULATORIO</span>
+                    </div>
+
+                    <div class="input-row">REGIME (DH, COD.5, PACC): <input type="text"></div>
+                </div>
+
+                <!-- Colonna Destra (A CARICO UOC) -->
+                <div class="col w-50 bg-gray" style="background: rgba(0,0,0,0.05);">
+                    <div class="bold" style="font-size: 8pt; margin-bottom: 5px;">A CARICO DELLA UOC LABORATORIO GENETICA MEDICA</div>
+                    <div class="input-row">Data appuntamento : <input type="text"></div>
+                    <div class="input-row">nome Consulente: <input type="text"></div>
+                    
+                    <div class="flex align-center" style="margin-top: 10px;">
+                        PRELIEVO PER TEST
+                        <div class="choice-box" style="margin-left: 20px;" onclick="toggleSelection(this)">
+                            <div class="choice-item">SI</div>
+                            <div class="choice-item">NO</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEZIONE 4: TEST GENETICO -->
+            <div class="row" style="display: block; padding: 0;">
+                <div class="section-header flex space-between align-center" style="border:none; border-bottom: 1px solid #000;">
+                    <span>RICHIESTA TEST GENETICO:</span>
+                    <div class="choice-box" style="background: white;" onclick="toggleSelection(this)">
+                        <div class="choice-item">SI</div>
+                        <div class="choice-item">NO</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="input-row">INDICAZIONE AL TEST GENETICO <input type="text"></div>
+                    <div class="input-row">NOTIZIE CLINICHE RILEVANTI <input type="text"></div>
+                    <div class="input-row"><input type="text"></div>
+                    
+                    <div class="flex flex-end align-center" style="margin: 5px 0;">
+                        URGENTE: 
+                        <div class="choice-box" onclick="toggleSelection(this)">
+                            <div class="choice-item">SI</div>
+                            <div class="choice-item">NO</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">MOTIVO URGENZA: <input type="text"></div>
+                </div>
+            </div>
+
+            <!-- SEZIONE 5: LISTA TEST -->
+            <div class="row" style="background-color: #f9f9f9;">
+                <!-- Colonna 1 -->
+                <div class="col col-border-right w-50">
+                    <div style="margin-bottom: 3px;"><input type="checkbox"> CARIOTIPO</div>
+                    <div style="margin-bottom: 3px;"><input type="checkbox"> TEST AL DEB</div>
+                    <div style="margin-bottom: 3px;"><input type="checkbox"> ARRAY-CGH</div>
+                    <div style="margin-bottom: 3px;"><input type="checkbox"> SNPs-ARRAY</div>
+                    <div style="margin-bottom: 3px;"><input type="checkbox"> QF-PCR</div>
+                    <div class="input-row"><input type="checkbox"> ALTRO <input type="text"></div>
+                </div>
+                <!-- Colonna 2 -->
+                <div class="col w-50">
+                    <div style="margin-bottom: 3px;"><input type="checkbox"> ANALISI PER FIBROSI CISTICA I LIVELLO</div>
+                    <div style="margin-bottom: 3px;"><input type="checkbox"> MICRODELEZIONE CROMOSOMA Y</div>
+                    <div style="margin-bottom: 3px;"><input type="checkbox"> BRCA1/2 (SEQ+MLPA)</div>
+                    <div style="margin-bottom: 3px;"><input type="checkbox"> FATTORI COAGULAZIONE</div>
+                    <div class="input-row"><input type="checkbox"> ANALISI DEL GENE <input type="text"></div>
+                    <div class="input-row"><input type="checkbox"> ALTRO <input type="text"></div>
+                    <div class="input-row"><input type="checkbox"> HLA <input type="text"></div>
+                </div>
+            </div>
+
+            <!-- SEZIONE 6: CAMPIONI -->
+            <div class="row" style="display: block; padding: 5px; background-color: #e8e8e8;">
+                <div class="flex space-between bold">
+                    <div class="flex align-center">CAMPIONI INVIATI N° <input type="text" style="width: 50px;"></div>
+                    <div class="flex align-center">DATA PRELIEVO <input type="text" style="width: 100px;"></div>
+                </div>
+                <div style="font-size: 8pt; margin-top: 5px;">TIPO DI CAMPIONI INVIATI (barrare la voce che interessa):</div>
+                
+                <div class="flex space-between" style="margin-top: 5px; font-size: 9pt;">
+                    <div class="w-50">
+                        <div style="margin-bottom: 3px;"><input type="checkbox"> SANGUE PERIFERICO (Eparina) n° provette <input type="text" style="width: 40px; border-bottom: none;"></div>
+                        <div><input type="checkbox"> SANGUE PERIFERICO (EDTA) n° provette <input type="text" style="width: 40px; border-bottom: none;"></div>
+                    </div>
+                    <div class="w-50">
+                        <div style="margin-bottom: 3px;"><input type="checkbox"> LIQUIDO AMNIOTICO n° provette <input type="text" style="width: 40px; border-bottom: none;"></div>
+                        <div class="input-row"><input type="checkbox"> ALTRO (specificare) <input type="text"> n° provette <input type="text" style="width: 30px; border-bottom: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEZIONE 7: SPAZIO RISERVATO -->
+            <div class="section-header" style="border-left:none; border-right:none; font-size: 8pt;">SPAZIO RISERVATO ALLA UOC LABORATORIO GENETICA MEDICA</div>
+            <div class="row" style="display: block; padding: 10px;">
+                <div class="flex space-between">
+                    <div class="w-50">
+                        <div class="input-row">DATA ARRIVO CAMPIONE/I &nbsp; <input type="text" style="width: 100px;"></div>
+                        <div class="input-row">ORA ARRIVO <input type="text"></div>
+                    </div>
+                    <div class="w-50" style="padding-left: 20px;">
+                        <div class="input-row">RICEVUTO DA <input type="text"></div>
+                        <div class="input-row">FIRMA <input type="text"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- Fine Main Container -->
+
+        <!-- FOOTER -->
+        <div class="footer">
+            Circonvallazione Gianicolense n. 87, 00152 Roma<br>
+            Padiglione Morgagni I piano<br>
+            Tel: 06-58704355 / 06-58704622 Fax: 06-58704647
+            <div class="flex space-between" style="margin-top: 10px;">
+                <span></span>
+                <span>Approvato Direzione</span>
+                <span>pag.1/1</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BOTTONE DOWNLOAD -->
+    <button id="downloadBtn" onclick="generatePDF()">SCARICA PDF</button>
+
+    <script>
+        // Funzione per gestire la selezione dei box SI/NO e M/F
+        function toggleSelection(element) {
+            // Se clicco su un elemento specifico dentro il box
+            if (event.target.classList.contains('choice-item')) {
+                // Rimuovi selezione dagli altri fratelli
+                let items = element.getElementsByClassName('choice-item');
+                for (let item of items) {
+                    item.classList.remove('selected');
+                }
+                // Aggiungi selezione a quello cliccato
+                event.target.classList.add('selected');
+            }
+        }
+
+        // Funzione per generare il PDF
+        function generatePDF() {
+            const element = document.getElementById('element-to-print');
+            const btn = document.getElementById('downloadBtn');
+
+            // Nascondi il bottone
+            btn.style.display = 'none';
+
+            // Salva stili originali
+            const originalMargin = element.style.margin;
+            const originalPadding = element.style.padding;
+            const originalBoxShadow = element.style.boxShadow;
+            const originalMinHeight = element.style.minHeight;
+
+            // Applica stili ottimizzati temporaneamente
+            element.style.margin = '0';
+            element.style.padding = '6mm';
+            element.style.boxShadow = 'none';
+            element.style.minHeight = '0';
+
+            // Opzioni per html2pdf
+            const opt = {
+                margin:       0,
+                filename:     'richiesta_genetica_compilata.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    scrollY: 0,
+                    scrollX: 0
+                },
+                jsPDF:        {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                },
+                pagebreak: { mode: 'avoid-all' }
+            };
+
+            // Attendi un momento per permettere il rendering, poi genera il PDF
+            setTimeout(function() {
+                html2pdf().set(opt).from(element).save().then(function() {
+                    // Ripristina stili originali
+                    element.style.margin = originalMargin;
+                    element.style.padding = originalPadding;
+                    element.style.boxShadow = originalBoxShadow;
+                    element.style.minHeight = originalMinHeight;
+                    btn.style.display = 'block';
+                }).catch(function(error) {
+                    console.error('Errore generazione PDF:', error);
+                    // Ripristina anche in caso di errore
+                    element.style.margin = originalMargin;
+                    element.style.padding = originalPadding;
+                    element.style.boxShadow = originalBoxShadow;
+                    element.style.minHeight = originalMinHeight;
+                    btn.style.display = 'block';
+                });
+            }, 100);
+        }
+    </script>
+
+</body>
+</html>
